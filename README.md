@@ -1,11 +1,25 @@
-# Three-Tier Docker Application
+# 🚀 Three-Tier Docker Application
 
-## Architecture
-- Nginx (Frontend)
-- Flask (Backend)
-- PostgreSQL (Database)
+## 📌 Overview
+A full-stack containerized application built using Docker and Docker Compose, implementing a secure three-tier architecture.
 
-## Features
-- User authentication
-- Note-taking system
-- Dockerized with Docker Compose
+## 🏗 Architecture
+- **Frontend**: Nginx (Reverse Proxy)
+- **Backend**: Flask API
+- **Database**: PostgreSQL (Persistent Storage)
+
+## ⚙️ Features
+- User authentication system
+- Note-taking dashboard
+- Multi-container orchestration using Docker Compose
+
+## 🔐 Security
+- Non-root container execution
+- Private network between services
+- Vulnerability scanning using Trivy
+- Multi-stage Docker builds
+
+## ▶️ How to Run
+
+```bash
+docker-compose up --build
