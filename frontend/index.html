@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Docker Notes App</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; padding: 50px; }
+        .hidden { display: none; }
+        .note { border: 1px solid #ccc; padding: 10px; margin: 10px 0; display: flex; justify-content: space-between; }
+        button { cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div id="auth-section">
+        <h1>Login / Signup</h1>
+        <input type="text" id="username" placeholder="Username"><br><br>
+        <input type="password" id="password" placeholder="Password"><br><br>
+        <button onclick="auth('login')">Login</button>
+        <button onclick="auth('signup')">Sign Up</button>
+        <p id="auth-msg"></p>
+    </div>
+
+    <div id="app-section" class="hidden">
+        <h1>My Notes</h1>
+        <button onclick="logout()">Logout</button><br><br>
+        <input type="text" id="note-input" placeholder="Type a note...">
+        <button onclick="addNote()">Add Note</button>
+        <div id="notes-list"></div>
+    </div>
+
+    <script>
+        const API = "http://localhost:5000";
+        let currentUserId = null;
+
+        async function auth(type) {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            const res = await fetch(`${API}/${type}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username: user, password: pass})
+            });
+            const data = await res.json();
+            if (res.ok) {
+                if (type === 'login') {
+                    currentUserId = data.user_id;
+                    showApp();
+                } else { alert("User created! Now login."); }
+            } else { alert(data.message); }
+        }
+
+        function showApp() {
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('app-section').classList.remove('hidden');
+            loadNotes();
+        }
+
+        async function loadNotes() {
+            const res = await fetch(`${API}/notes/${currentUserId}`);
+            const notes = await res.json();
+            const list = document.getElementById('notes-list');
+            list.innerHTML = notes.map(n => `
+                <div class="note">
+                    <span>${n.content}</span>
+                    <button onclick="deleteNote(${n.id})">Delete</button>
+                </div>
+            `).join('');
+        }
+
+        async function addNote() {
+            const content = document.getElementById('note-input').value;
+            await fetch(`${API}/notes/${currentUserId}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({content})
+            });
+            document.getElementById('note-input').value = '';
+            loadNotes();
+        }
+
+        async function deleteNote(id) {
+            await fetch(`${API}/notes/delete/${id}`, { method: 'DELETE' });
+            loadNotes();
+        }
+
+        function logout() { location.reload(); }
+    </script>
+</body>
+</html>
